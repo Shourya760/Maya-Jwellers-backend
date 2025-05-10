@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/jwtUtils.js';
 import User from '../models/userModel.js'
 import BlacklistedToken from '../models/blacklistedTokenModel.js';
+import { successResponse,errorResponse } from '../utils/response.js';
 
 // Register user
 export const registerUser = async (req, res) => {
@@ -30,7 +31,7 @@ export const loginUser = async (req, res) => {
 
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ where: { email } });
+        const user = await User.unscoped().findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials!' });
         }
@@ -39,13 +40,15 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials!' });
         }
         const token = generateToken(user);
-        res.status(200).json({
-            message: 'User logged in successfully!',
-            token, // Send token to the client
-            user: { id: user.id, name: user.name, email: user.email }
-        });
+
+        res.status(200).json(
+            successResponse('User logged in successfully!', {
+                token,
+                user: user
+            })
+        );
     } catch (error) {
-        res.status(500).json({ message: 'Error logging in user!', error });
+        res.status(500).json(errorResponse('Error logging in user!', error.message));
     }
 };
 
@@ -61,7 +64,9 @@ export const logoutUser = async (req, res) => {
         const expiryDate = new Date(decoded.exp * 1000); // Convert exp (seconds) to milliseconds
         // Store in DB
         await BlacklistedToken.create({ token, expiryDate });
-        res.status(200).json({ message: 'User logged out and token blacklisted!' });
+        res.status(200).json(
+            successResponse('User logged out and token blacklisted!')
+        );
     } catch (error) {
         res.status(500).json({ message: 'Error logging out user!', error });
     }
@@ -84,7 +89,11 @@ export const getCurrentUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found!' });
         }
-        res.status(200).json({ user });
+        res.status(200).json(
+            successResponse('User logged in successfully!', {
+                user
+            })
+        );
     } catch (error) {
         res.status(500).json({ message: 'Error fetching user!', error });
     }
