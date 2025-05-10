@@ -12,7 +12,7 @@ export const registerUser = async (req, res) => {
     try {
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists!' });
+            return res.status(400).json(errorResponse('User already exists!', 'Email already in use!'));
         }
         const newUser = await User.create({ name, email, phone, password });
         const token = generateToken(newUser);
@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
             user: { id: newUser.id, name: newUser.name, email: newUser.email }
         });
     } catch (error) {
-        res.status(500).json({ message: 'Error registering user!', error });
+        res.status(500).json(errorResponse('Error registering user!', error.message));
     }
 };
 
@@ -33,11 +33,11 @@ export const loginUser = async (req, res) => {
     try {
         const user = await User.unscoped().findOne({ where: { email } });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials!' });
+            return res.status(400).json(errorResponse('User not found!', 'Email does not exist!'));
         }
         const isMatch = await bcrypt.compare(password, user.password); // Compare hashed password
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials!' });
+            return res.status(400).json(errorResponse('Invalid credentials!', 'Password does not match!'));
         }
         const token = generateToken(user);
 
@@ -57,7 +57,7 @@ export const logoutUser = async (req, res) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
-            return res.status(400).json({ message: 'No token provided' });
+            return res.status(400).json(errorResponse('No token provided!', 'Token is required for logout!'));
         }
         // Decode the token to get expiration (optional)
         const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
@@ -65,10 +65,10 @@ export const logoutUser = async (req, res) => {
         // Store in DB
         await BlacklistedToken.create({ token, expiryDate });
         res.status(200).json(
-            successResponse('User logged out and token blacklisted!')
+            successResponse('User logged out!')
         );
     } catch (error) {
-        res.status(500).json({ message: 'Error logging out user!', error });
+        res.status(500).json(errorResponse('Error logging out user!', error.message));
     }
 };
 
