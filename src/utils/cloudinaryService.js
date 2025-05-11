@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
+import path from 'path';
 
 dotenv.config(); // Make sure to load environment variables
 
@@ -28,10 +29,31 @@ export const uploadToCloudinary = async (filePath, publicId = null) => {
         return uploadResult.secure_url;
     } catch (error) {
         console.error('Cloudinary Upload Error:', error);
-        // ❗ Optional cleanup in case file exists and upload fails
         try {
             await fs.unlink(filePath);
         } catch (_) { }
         throw new Error('Image upload failed');
+    }
+};
+
+
+/**
+ * Deletes an image from Cloudinary using its full URL.
+ * @param {string} imageUrl - The full URL of the image on Cloudinary.
+ * @returns {Promise<void>}
+ */
+export const deleteFromCloudinary = async (imageUrl) => {
+    try {
+        // Extract public ID from the URL
+        const parts = imageUrl.split('/');
+        const fileName = parts[parts.length - 1]; // e.g. abc123.jpg
+        const folder = parts[parts.length - 2];    // e.g. Maya-Jewellers
+        const publicId = `${folder}/${path.parse(fileName).name}`; // e.g. Maya-Jewellers/abc123
+
+        await cloudinary.uploader.destroy(publicId);
+        console.log(`Deleted image: ${publicId}`);
+    } catch (error) {
+        console.error('Cloudinary Delete Error:', error);
+        throw new Error('Image deletion failed');
     }
 };
