@@ -6,7 +6,6 @@ import { successResponse,errorResponse } from '../utils/response.js';
 
 // Register user
 export const registerUser = async (req, res) => {
-    console.log("debug 1")
     const { name, email, phone, password } = req.body;
 
     try {

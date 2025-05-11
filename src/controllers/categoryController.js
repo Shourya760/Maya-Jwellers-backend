@@ -3,16 +3,17 @@ import { uploadToCloudinary } from '../utils/cloudinaryService.js'; // Assuming 
 import { successResponse, errorResponse } from '../utils/response.js';
 
 export const addCategory = async (req, res) => {
-    try {        
+    console.log("req.body", req.body);
+    console.log("req.file", req.file);
+    try {
         const { name } = req.body;
-        const image = req.file.path; // Assuming you're using multer for file uploads
         if (!name) {
             return res.status(400).json(errorResponse('Category name is required'));
-        }   
+        }
         let imageUrl = null;
-        if (image) {
+        if (req.file) {
             // Upload image to Cloudinary
-            imageUrl = await uploadToCloudinary(image);
+            imageUrl = await uploadToCloudinary(req.file.path);
         }
         // Create new category
         const newCategory = await Category.create({

@@ -2,7 +2,6 @@ import { verifyToken } from "../utils/jwtUtils.js";
 import { errorResponse } from "../utils/response.js";
 
 export const authenticate = (req, res, next) => {
-    console.log("debug 1");
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
