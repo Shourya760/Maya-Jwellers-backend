@@ -3,18 +3,18 @@ import { registerUser, loginUser, logoutUser, getCurrentUser } from '../controll
 import { authenticate } from '../middlewares/authMiddleware.js';
 import { checkBlacklistedToken } from '../middlewares/checkBlacklistedMiddleware.js';
 
-const router = express.Router();
+const userRouter = express.Router();
 
 // User registration route
-router.post('/register', registerUser);
+userRouter.post('/register', registerUser);
 
 // User login route
-router.post('/login', loginUser);
+userRouter.post('/login', loginUser);
 
 // User logout route
-router.post('/logout', authenticate, checkBlacklistedToken, logoutUser);
+userRouter.post('/logout', authenticate, checkBlacklistedToken, logoutUser);
 
 // Get current user route
-router.get('/user', getCurrentUser);
+userRouter.get('/user', getCurrentUser);
 
-export default router;
+export default userRouter;
