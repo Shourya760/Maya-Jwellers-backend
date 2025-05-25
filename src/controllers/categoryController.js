@@ -93,6 +93,19 @@ export const getCategories = async (req, res) => {
     }
 };
 
+export const getAllCategories = async (req, res) => {
+    console.log('Fetching all categories');
+    try {
+        const categories = await Category.findAll({
+            order: [['id', 'DESC']],
+        });
+        const totalCategories = categories.length;
+        res.status(200).json(successResponse('All categories fetched successfully', { categories, totalCategories }));
+    } catch (error) {
+        res.status(500).json(errorResponse('Failed to fetch categories', error));
+    }
+};
+
 export const getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -107,6 +120,7 @@ export const getCategoryById = async (req, res) => {
 };
 
 export const deleteCategory = async (req, res) => {
+    // TODO: Need to be updated as Product will be mapped to category
     try {
         const { id } = req.params;
         const category = await Category.findByPk(id);

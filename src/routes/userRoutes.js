@@ -15,6 +15,6 @@ userRouter.post('/login', loginUser);
 userRouter.post('/logout', authenticate, checkBlacklistedToken, logoutUser);
 
 // Get current user route
-userRouter.get('/user', getCurrentUser);
+userRouter.get('/user', authenticate, checkBlacklistedToken, getCurrentUser);
 
 export default userRouter;
